@@ -1,5 +1,7 @@
 #include "parcer.h"
 
+#include <vector>
+
 namespace s21 {
 
 Parcer& Parcer::operator=(const Parcer& other) {
@@ -17,14 +19,18 @@ Parcer& Parcer::operator=(Parcer&& other) noexcept {
   return *this;
 };
 
+Parcer& Parcer::operator()(const std::string& str) {
+  Clear();
+  expression_ = str;
+  ReadString();
+  return *this;
+};
+
 void Parcer::Calculate(const std::string& str, size_t priority) {
   if (str == ")") {
     while (!op_stack_.empty() && op_stack_.top().first != "(")
       ChooseCalculateMode();
     op_stack_.pop();
-    if (!op_stack_.empty() && op_stack_.top().second == 4) {
-      FunctionMode();
-    };
   } else {
     while (!op_stack_.empty() && op_stack_.top().second >= priority)
       ChooseCalculateMode();
@@ -43,10 +49,11 @@ double Parcer::ReadString() {
   char* end{&expression_[expression_.size()]};
   Validator();
   if (is_valid_) {
+    if (expression_.size() > 255) expression_.resize(255);
     while (is_valid_ && ptr != end) {
-      CheckDigit(&ptr, end);
-      CheckFunction(&ptr, end);
-      CheckOperator(&ptr, end);
+      if (is_valid_) CheckDigit(&ptr, end);
+      if (is_valid_) CheckFunction(&ptr, end);
+      if (is_valid_) CheckOperator(&ptr, end);
     }
     while (!op_stack_.empty() && !num_stack_.empty()) ChooseCalculateMode();
     if (!op_stack_.empty() || num_stack_.empty()) is_valid_ = false;
@@ -55,7 +62,7 @@ double Parcer::ReadString() {
 };
 
 void Parcer::AddToStack(std::string& buffer) {
-  if (!buffer.empty()) {
+  if (!buffer.empty() && is_valid_) {
     size_t new_priority = TakePriority(buffer);
     CheckUnary(buffer, new_priority);
     if (buffer != "(" && CheckPow(buffer)) Calculate(buffer, new_priority);
@@ -134,6 +141,7 @@ void Parcer::Validator() {
   int bracer{};
   char prev{};
   bool has_dot{};
+  is_valid_ = true;
   for (auto it : expression_) {
     if (it == '(')
       ++bracer;
@@ -167,9 +175,19 @@ void Parcer::CheckFunction(char** ptr, char* end) {
   std::string buffer{};
   while (*ptr != end && std::isalpha(**ptr)) buffer += *((*ptr)++);
   if (!buffer.empty()) {
+    CheckCorrectFunction(buffer);
     AddToStack(buffer);
     digit_last_ = false;
   }
+};
+
+void Parcer::CheckCorrectFunction(const std::string& str) {
+  const std::vector<std::string> standard{"sin",  "cos",  "tan", "asin", "acos",
+                                          "atan", "sqrt", "ln",  "log"};
+  bool res{};
+  for (auto it : standard)
+    if (it == str) res = true;
+  is_valid_ = res;
 };
 
 void Parcer::CheckOperator(char** ptr, char* end) {
@@ -197,5 +215,13 @@ void Parcer::CheckUnary(const std::string& buffer,
     num_stack_.push(0);
   }
 };
+
+void Parcer::Clear() {
+  expression_ = {};
+  while (!op_stack_.empty()) op_stack_.pop();
+  while (!num_stack_.empty()) num_stack_.pop();
+  is_valid_ = false;
+  digit_last_ = false;
+}
 
 }  // namespace s21

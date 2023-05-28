@@ -1,0 +1,34 @@
+#ifndef CALCULATOR_H
+#define CALCULATOR_H
+
+#include <QMainWindow>
+
+#include "../Controller/controller.h"
+
+QT_BEGIN_NAMESPACE
+namespace Ui {
+class Calculator;
+}
+QT_END_NAMESPACE
+
+namespace s21 {
+class Calculator : public QMainWindow {
+  Q_OBJECT
+
+ public:
+  Calculator(QWidget *parent = nullptr);
+  ~Calculator();
+
+ private:
+  Ui::Calculator *ui;
+  s21::Controller cont_;
+  bool result_pressed_;
+
+ private slots:
+  void PrintSymbols();
+  void PrintOperators();
+  void Result();
+  void Clear();
+};
+}  // namespace s21
+#endif  // CALCULATOR_H

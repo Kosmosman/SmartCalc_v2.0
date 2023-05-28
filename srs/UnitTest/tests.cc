@@ -14,7 +14,7 @@ struct CalculatorTest {
   s21::Parcer incorrect_one{"1+2+3+"};
   s21::Parcer incorrect_two{"*2+2"};
   s21::Parcer incorrect_three{"4**2"};
-  s21::Parcer incorrect_four{"sincos"};
+  s21::Parcer incorrect_four{"sincos/2"};
   s21::Parcer incorrect_five{"2342tey35twr"};
   s21::Parcer incorrect_six{"1321.23413.4"};
 

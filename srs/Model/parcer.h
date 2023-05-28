@@ -26,6 +26,7 @@ class Parcer {
 
   Parcer& operator=(const Parcer& other);
   Parcer& operator=(Parcer&& other) noexcept;
+  Parcer& operator()(const std::string& str);
 
   double Answer() const noexcept { return is_valid_ ? num_stack_.top() : 0; };
   bool IsValideExpression() const noexcept { return is_valid_; };
@@ -41,9 +42,11 @@ class Parcer {
   void Calculate(const std::string& str, size_t priority);
   void CheckDigit(char** ptr, char* end);
   void CheckFunction(char** ptr, char* end);
+  void CheckCorrectFunction(const std::string& str);
   void CheckOperator(char** ptr, char* end);
   bool CheckPow(const std::string& buffer) const noexcept;
   void CheckUnary(const std::string& buffer, const size_t& priority) noexcept;
+  void Clear();
 
   std::string expression_{};
   std::stack<double> num_stack_{};
