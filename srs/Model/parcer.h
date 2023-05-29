@@ -42,10 +42,11 @@ class Parcer {
   void Calculate(const std::string& str, size_t priority);
   void CheckDigit(char** ptr, char* end);
   void CheckFunction(char** ptr, char* end);
-  void CheckCorrectFunction(const std::string& str);
+  bool CheckCorrectFunction(const std::string& str);
   void CheckOperator(char** ptr, char* end);
+  bool CheckCorrectOperator(const std::string& str);
   bool CheckPow(const std::string& buffer) const noexcept;
-  void CheckUnary(const std::string& buffer, const size_t& priority) noexcept;
+  void CheckUnary(const size_t& priority) noexcept;
   void Clear();
 
   std::string expression_{};

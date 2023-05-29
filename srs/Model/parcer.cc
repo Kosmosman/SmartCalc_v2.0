@@ -1,5 +1,6 @@
 #include "parcer.h"
 
+#include <iostream>
 #include <vector>
 
 namespace s21 {
@@ -31,6 +32,8 @@ void Parcer::Calculate(const std::string& str, size_t priority) {
     while (!op_stack_.empty() && op_stack_.top().first != "(")
       ChooseCalculateMode();
     op_stack_.pop();
+    if (!op_stack_.empty() && op_stack_.top().second == 4)
+      ChooseCalculateMode();
   } else {
     while (!op_stack_.empty() && op_stack_.top().second >= priority)
       ChooseCalculateMode();
@@ -64,7 +67,7 @@ double Parcer::ReadString() {
 void Parcer::AddToStack(std::string& buffer) {
   if (!buffer.empty() && is_valid_) {
     size_t new_priority = TakePriority(buffer);
-    CheckUnary(buffer, new_priority);
+    CheckUnary(new_priority);
     if (buffer != "(" && CheckPow(buffer)) Calculate(buffer, new_priority);
     if (buffer != ")") op_stack_.push({buffer, new_priority});
     buffer.clear();
@@ -101,7 +104,8 @@ void Parcer::OperationMode() {
   else if (op == "*")
     num_stack_.push(first * second);
   else if (op == "/")
-    num_stack_.push(first / second);
+    std::fabs(second) > __DBL_EPSILON__ ? num_stack_.push(first / second)
+                                        : num_stack_.push(NAN);
   else if (op == "^")
     num_stack_.push(std::pow(first, second));
   else if (op == "%")
@@ -147,11 +151,14 @@ void Parcer::Validator() {
       ++bracer;
     else if (it == ')')
       --bracer;
-    else if (prev && std::strchr("+-*/%^", prev) && std::strchr("+-*/%^", it))
+    if (prev && std::strchr("+-*/%^", prev) && std::strchr("+-*/%^", it))
       is_valid_ = false;
     else if ((!prev || prev == '(') && std::strchr("*/%^", it))
       is_valid_ = false;
-    else if (prev && prev == ')' && std::isdigit(it))
+    else if (prev && it == ')' &&
+             (std::strchr("+-*/%^", prev) || std::isalpha(prev)))
+      is_valid_ = false;
+    else if (prev == ')' && std::isdigit(it))
       is_valid_ = false;
     if (bracer < 0) is_valid_ = false;
     if (it == '.' && has_dot) is_valid_ = false;
@@ -159,7 +166,7 @@ void Parcer::Validator() {
     if (it == '.') has_dot = true;
     prev = it;
   }
-  if (prev && std::strchr("+-*/%^", prev)) is_valid_ = false;
+  if (std::strchr("+-*/%^(", prev)) is_valid_ = false;
 };
 
 void Parcer::CheckDigit(char** ptr, char* end) {
@@ -175,28 +182,36 @@ void Parcer::CheckFunction(char** ptr, char* end) {
   std::string buffer{};
   while (*ptr != end && std::isalpha(**ptr)) buffer += *((*ptr)++);
   if (!buffer.empty()) {
-    CheckCorrectFunction(buffer);
-    AddToStack(buffer);
+    if (digit_last_) is_valid_ = false;
+    if (CheckCorrectFunction(buffer)) AddToStack(buffer);
     digit_last_ = false;
   }
 };
 
-void Parcer::CheckCorrectFunction(const std::string& str) {
+bool Parcer::CheckCorrectFunction(const std::string& str) {
   const std::vector<std::string> standard{"sin",  "cos",  "tan", "asin", "acos",
                                           "atan", "sqrt", "ln",  "log"};
   bool res{};
   for (auto it : standard)
     if (it == str) res = true;
   is_valid_ = res;
+  return is_valid_;
 };
 
 void Parcer::CheckOperator(char** ptr, char* end) {
   std::string buffer{};
   if (*ptr != end && std::ispunct(**ptr) && **ptr != '.') buffer += *((*ptr)++);
   if (!buffer.empty()) {
-    AddToStack(buffer);
+    if (CheckCorrectOperator(buffer)) AddToStack(buffer);
     digit_last_ = false;
   }
+};
+
+bool Parcer::CheckCorrectOperator(const std::string& str) {
+  if (!op_stack_.empty() && op_stack_.top().second == 4 &&
+      TakePriority(str) > 0 && !digit_last_)
+    is_valid_ = false;
+  return is_valid_;
 };
 
 bool Parcer::CheckPow(const std::string& buffer) const noexcept {
@@ -207,8 +222,7 @@ bool Parcer::CheckPow(const std::string& buffer) const noexcept {
 // скобки. Также проверяем, что унарный знак ставится сразу после (. Если
 // условия выполняются, то мы отправляем в стак с числами 0 для корректного
 // подсчета
-void Parcer::CheckUnary(const std::string& buffer,
-                        const size_t& priority) noexcept {
+void Parcer::CheckUnary(const size_t& priority) noexcept {
   if ((num_stack_.empty() ||
        (!op_stack_.empty() && op_stack_.top().first == "(")) &&
       priority == 1 && !digit_last_) {

@@ -1,6 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "parcer.h"
+#include <string>
+#include <vector>
+
+#include "../Model/parcer.h"
 
 struct CalculatorTest {
   s21::Parcer correct_one{"1+2+3-4*5/(3.3^2)"};
@@ -11,19 +14,17 @@ struct CalculatorTest {
       "log(10^2/3)^3^2*5+2.4*(1-2^7)/ln(12.223)-12.64^acos(-0.041)"};
   s21::Parcer correct_six{"ln(log(3456)^0.2/3)*22^0.2/6+112.34-11*5.2"};
 
-  s21::Parcer incorrect_one{"1+2+3+"};
-  s21::Parcer incorrect_two{"*2+2"};
-  s21::Parcer incorrect_three{"4**2"};
-  s21::Parcer incorrect_four{"sincos/2"};
-  s21::Parcer incorrect_five{"2342tey35twr"};
-  s21::Parcer incorrect_six{"1321.23413.4"};
-
   double answer_one{4.16345270891};
   double answer_two{27.5431196133};
   double answer_three{-8.79691001301};
   double answer_four{2.82733260398};
   double answer_five{38.8363096333};
   double answer_six{54.8784012618};
+
+  std::vector<std::string> incorrect_collection{
+      "sin-",   "(-)",  "cos-45", "ln",     "-5-",          "log(*)",
+      "1+2+3+", "*2+2", "4**2",   "sincos", "2342tey35twr", "1321.23413.4",
+      ")",      "-(",   "0/",     "(sin)"};
 };
 
 TEST(Validator, CorrectTest1) {
@@ -61,34 +62,11 @@ TEST(Validator, EmptyString) {
   EXPECT_FALSE(s21::Parcer{emp}.IsValideExpression());
 }
 
-TEST(Validator, IncorrectTest1) {
+TEST(Validator, IncorrectTestCollection) {
   CalculatorTest one;
-  EXPECT_FALSE(one.incorrect_one.IsValideExpression());
-}
-
-TEST(Validator, IncorrectTest2) {
-  CalculatorTest one;
-  EXPECT_FALSE(one.incorrect_two.IsValideExpression());
-}
-
-TEST(Validator, IncorrectTest3) {
-  CalculatorTest one;
-  EXPECT_FALSE(one.incorrect_three.IsValideExpression());
-}
-
-TEST(Validator, IncorrectTest4) {
-  CalculatorTest one;
-  EXPECT_FALSE(one.incorrect_four.IsValideExpression());
-}
-
-TEST(Validator, IncorrectTest5) {
-  CalculatorTest one;
-  EXPECT_FALSE(one.incorrect_five.IsValideExpression());
-}
-
-TEST(Validator, IncorrectTest6) {
-  CalculatorTest one;
-  EXPECT_FALSE(one.incorrect_six.IsValideExpression());
+  s21::Parcer p;
+  for (auto it : one.incorrect_collection)
+    EXPECT_FALSE(p(it).IsValideExpression());
 }
 
 TEST(Calculator, UnaryMinus) {
@@ -203,6 +181,11 @@ TEST(Calculator, CorrectLogTest) {
 
 TEST(Calculator, IncorrectLogTest) {
   s21::Parcer one{"log(-1.2)"};
+  EXPECT_TRUE(std::isnan(one.Answer()));
+}
+
+TEST(Calculator, ZeroDivision) {
+  s21::Parcer one{"5/0"};
   EXPECT_TRUE(std::isnan(one.Answer()));
 }
 
