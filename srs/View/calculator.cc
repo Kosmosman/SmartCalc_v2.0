@@ -1,6 +1,8 @@
 #include "calculator.h"
 
 #include <QVector>
+#include <algorithm>
+#include <utility>
 
 #include "./ui_calculator.h"
 namespace s21 {
@@ -42,6 +44,7 @@ Calculator::Calculator(QWidget* parent)
   delete buttons;
   connect(ui->pushButton_result, SIGNAL(clicked()), this, SLOT(Result()));
   connect(ui->pushButton_delete, SIGNAL(clicked()), this, SLOT(Clear()));
+  connect(ui->pushButton_graphic, SIGNAL(clicked()), this, SLOT(Display()));
 }
 
 Calculator::~Calculator() { delete ui; }
@@ -53,22 +56,46 @@ void Calculator::PrintSymbols() {
   result_pressed_ = false;
 }
 
-void Calculator::PrintOperators()
-{
-    QPushButton* button = (QPushButton*)sender();
-    ui->label->setText(ui->label->text() + button->text());
-    result_pressed_ = false;
+void Calculator::PrintOperators() {
+  QPushButton* button = (QPushButton*)sender();
+  ui->label->setText(ui->label->text() + button->text());
+  result_pressed_ = false;
 }
 
 void Calculator::Result() {
   std::string text = ui->label->text().toStdString();
+  std::string value = ui->lineEdit_value->text().toStdString();
   if (cont_.IsValid(text))
-    ui->label->setText(QString::fromUtf8(cont_.Result(text)));
+    ui->label->setText(QString::fromUtf8(cont_.Result(text, value)));
   else
     ui->label->setText("ERROR");
   result_pressed_ = true;
 }
 
 void Calculator::Clear() { ui->label->setText(""); }
+
+void Calculator::Display() {
+  std::pair<std::vector<double>, std::vector<double>> dots =
+      cont_.CreateDots(ui->label->text().toStdString(),
+                       {ui->lineEdit_x_start->text().toInt(),
+                        ui->lineEdit_x_end->text().toInt()},
+                       {ui->lineEdit_y_start->text().toInt(),
+                        ui->lineEdit_y_end->text().toInt()});
+  QVector<double> x_dots =
+      QVector<double>{dots.first.begin(), dots.first.end()};
+  QVector<double> y_dots =
+      QVector<double>{dots.second.begin(), dots.second.end()};
+  ui->graph->addGraph();
+  ui->graph->graph(0)->setScatterStyle(QCPScatterStyle::ssDot);
+  ui->graph->graph(0)->setData(x_dots, y_dots);
+  ui->graph->xAxis->setLabel("x");
+  ui->graph->yAxis->setLabel("y");
+  ui->graph->xAxis->setRange(ui->lineEdit_x_start->text().toInt(),
+                             ui->lineEdit_x_end->text().toInt());
+  ui->graph->yAxis->setRange(ui->lineEdit_y_start->text().toInt(),
+                             ui->lineEdit_y_end->text().toInt());
+  ui->graph->replot();
+  ui->label->setText("");
+}
 
 }  // namespace s21

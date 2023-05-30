@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -66,7 +67,7 @@ TEST(Validator, IncorrectTestCollection) {
   CalculatorTest one;
   s21::Parcer p;
   for (auto it : one.incorrect_collection)
-    EXPECT_FALSE(p(it).IsValideExpression());
+    EXPECT_FALSE(p(it, "0").IsValideExpression());
 }
 
 TEST(Calculator, UnaryMinus) {
@@ -185,8 +186,36 @@ TEST(Calculator, IncorrectLogTest) {
 }
 
 TEST(Calculator, ZeroDivision) {
-  s21::Parcer one{"5/0"};
+  s21::Parcer one{"5/0-3+99"};
   EXPECT_TRUE(std::isnan(one.Answer()));
+}
+
+TEST(Calculator, ReplaceTest) {
+  s21::Parcer one;
+  one("5+x", "10");
+  EXPECT_NEAR(one.Answer(), 15, 0.0000001);
+}
+
+TEST(Calculator, ReplaceTestTwo) {
+  s21::Parcer one;
+  one("x+5", "10");
+  EXPECT_NEAR(one.Answer(), 15, 0.0000001);
+}
+
+TEST(Calculator, IncorrectReplaceTest) {
+  s21::Parcer one;
+  one("5+xx", "10");
+  EXPECT_FALSE(one.IsValideExpression());
+}
+
+TEST(Calculator, DotTest) {
+  s21::Parcer one;
+  one("5+xx", "10");
+  EXPECT_FALSE(one.IsValideExpression());
+  auto res = one.CreateDots("10+x", {-10, 10}, {-10, 10});
+  for (auto it : res.second) {
+    std::cout << "Second = " << it << std::endl;
+  }
 }
 
 int main(int argc, char **argv) {

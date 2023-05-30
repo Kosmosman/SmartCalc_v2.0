@@ -58,6 +58,12 @@ set_target_properties(SmartCalc_v2 PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+add_subdirectory(View/QCustomPlot-library)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE qcustomplot)
+target_compile_definitions(${PROJECT_NAME} PRIVATE QCUSTOMPLOT_USE_LIBRARY)
+
+
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(SmartCalc_v2)
 endif()

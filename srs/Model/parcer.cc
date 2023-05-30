@@ -1,7 +1,6 @@
 #include "parcer.h"
 
 #include <iostream>
-#include <vector>
 
 namespace s21 {
 
@@ -20,10 +19,14 @@ Parcer& Parcer::operator=(Parcer&& other) noexcept {
   return *this;
 };
 
-Parcer& Parcer::operator()(const std::string& str) {
+Parcer& Parcer::operator()(const std::string& str, const std::string& x) {
   Clear();
   expression_ = str;
-  ReadString();
+  if (expression_.size() > 255) expression_.resize(255);
+  if (ValidatorForX()) {
+    Replace(x);
+    ReadString();
+  }
   return *this;
 };
 
@@ -52,7 +55,6 @@ double Parcer::ReadString() {
   char* end{&expression_[expression_.size()]};
   Validator();
   if (is_valid_) {
-    if (expression_.size() > 255) expression_.resize(255);
     while (is_valid_ && ptr != end) {
       if (is_valid_) CheckDigit(&ptr, end);
       if (is_valid_) CheckFunction(&ptr, end);
@@ -156,7 +158,8 @@ void Parcer::Validator() {
     else if ((!prev || prev == '(') && std::strchr("*/%^", it))
       is_valid_ = false;
     else if (prev && it == ')' &&
-             (std::strchr("+-*/%^", prev) || std::isalpha(prev)))
+             (std::strchr("+-*/%^", prev) ||
+              (std::isalpha(prev) && prev != 'x')))
       is_valid_ = false;
     else if (prev == ')' && std::isdigit(it))
       is_valid_ = false;
@@ -168,6 +171,19 @@ void Parcer::Validator() {
   }
   if (std::strchr("+-*/%^(", prev)) is_valid_ = false;
 };
+
+bool Parcer::ValidatorForX() {
+  char prev{};
+  is_valid_ = true;
+  for (auto it : expression_) {
+    if (prev == 'x' && it == 'x') {
+      is_valid_ = false;
+      break;
+    }
+    prev = it;
+  }
+  return is_valid_;
+}
 
 void Parcer::CheckDigit(char** ptr, char* end) {
   std::string buffer{};
@@ -218,10 +234,6 @@ bool Parcer::CheckPow(const std::string& buffer) const noexcept {
   return op_stack_.empty() || op_stack_.top().first != "^" || buffer != "^";
 };
 
-// Унарный знак мы ставим в двух случаях: в начале выражения и после открывающей
-// скобки. Также проверяем, что унарный знак ставится сразу после (. Если
-// условия выполняются, то мы отправляем в стак с числами 0 для корректного
-// подсчета
 void Parcer::CheckUnary(const size_t& priority) noexcept {
   if ((num_stack_.empty() ||
        (!op_stack_.empty() && op_stack_.top().first == "(")) &&
@@ -237,5 +249,36 @@ void Parcer::Clear() {
   is_valid_ = false;
   digit_last_ = false;
 }
+
+void Parcer::Replace(const std::string& x) {
+  for (int i = static_cast<int>(expression_.size()) - 1; i >= 0; --i) {
+    if (expression_[i] == 'x') expression_.replace(i, 1, x);
+  }
+}
+
+std::pair<std::vector<double>, std::vector<double>> Parcer::CreateDots(
+    const std::string& str, std::pair<int, int> x_borders,
+    std::pair<int, int> y_borders) {
+  expression_ = str;
+  std::string num_in_str;
+  std::pair<std::vector<double>, std::vector<double>> result;
+  if (ValidatorForX()) {
+    if (x_borders.first >= x_borders.second ||
+        y_borders.first >= y_borders.second) {
+      x_borders.first = y_borders.first = -10;
+      x_borders.second = y_borders.second = 10;
+    }
+    int top_border = abs(x_borders.first) + abs(x_borders.second);
+    result.first.reserve(top_border * 10);
+    result.second.reserve(top_border * 10);
+    for (int i = 0; i < top_border * 10; ++i) {
+      num_in_str = "(" + std::to_string(i / 10.0 + x_borders.first) + ")";
+      operator()(str, num_in_str);
+      result.first.push_back(i / 10.0 + x_borders.first);
+      result.second.push_back(Answer());
+    }
+  }
+  return result;
+};
 
 }  // namespace s21

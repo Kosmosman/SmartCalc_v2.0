@@ -6,6 +6,7 @@
 #include <stack>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace s21 {
 class Parcer {
@@ -26,15 +27,19 @@ class Parcer {
 
   Parcer& operator=(const Parcer& other);
   Parcer& operator=(Parcer&& other) noexcept;
-  Parcer& operator()(const std::string& str);
+  Parcer& operator()(const std::string& str, const std::string& x);
 
   double Answer() const noexcept { return is_valid_ ? num_stack_.top() : 0; };
   bool IsValideExpression() const noexcept { return is_valid_; };
+  std::pair<std::vector<double>, std::vector<double>> CreateDots(
+      const std::string& str, std::pair<int, int> x_borders,
+      std::pair<int, int> y_borders);
 
  private:
   size_t TakePriority(const std::string& op) noexcept;
   void ChooseCalculateMode();
   void Validator();
+  bool ValidatorForX();
   double ReadString();
   void AddToStack(std::string& buffer);
   void OperationMode();
@@ -48,10 +53,11 @@ class Parcer {
   bool CheckPow(const std::string& buffer) const noexcept;
   void CheckUnary(const size_t& priority) noexcept;
   void Clear();
+  void Replace(const std::string& x);
 
   std::string expression_{};
   std::stack<double> num_stack_{};
-  std::stack<std::pair<std::string, size_t> > op_stack_{};
+  std::stack<std::pair<std::string, size_t>> op_stack_{};
   bool is_valid_{true};
   bool digit_last_{};
 };

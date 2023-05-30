@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "../Controller/controller.h"
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -29,6 +30,7 @@ class Calculator : public QMainWindow {
   void PrintOperators();
   void Result();
   void Clear();
+  void Display();
 };
 }  // namespace s21
 #endif  // CALCULATOR_H

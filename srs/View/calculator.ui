@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>568</height>
+    <width>810</width>
+    <height>499</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>740</width>
-      <height>513</height>
+      <width>801</width>
+      <height>451</height>
      </rect>
     </property>
     <widget class="QPushButton" name="pushButton_7">
@@ -783,17 +783,6 @@ background-color: rgb(255, 165, 76);</string>
       <string>)</string>
      </property>
     </widget>
-    <widget class="QWidget" name="gridLayoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>369</x>
-       <y>-1</y>
-       <width>371</width>
-       <height>371</height>
-      </rect>
-     </property>
-     <layout class="QGridLayout" name="gridLayout"/>
-    </widget>
     <widget class="QPushButton" name="pushButton_sqrt">
      <property name="geometry">
       <rect>
@@ -818,35 +807,11 @@ QPushButton:pressed {
       <string>sqrt</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_credit_calculate">
-     <property name="geometry">
-      <rect>
-       <x>250</x>
-       <y>380</y>
-       <width>120</width>
-       <height>61</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">QPushButton {
-	border: 1px solid rgb(101, 198, 255);
-	color: black;
-	background-color:#ff7700;
-}
-
-QPushButton:pressed {
-	background-color: qlineargradient(x1: 0, y1:0, x2: 0, y2: 1, stop: 0 #ff0000, stop: 1 #ff7300);
-}</string>
-     </property>
-     <property name="text">
-      <string>Credit calculator</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="pushButton_graphic">
      <property name="geometry">
       <rect>
-       <x>0</x>
-       <y>450</y>
+       <x>410</x>
+       <y>380</y>
        <width>81</width>
        <height>61</height>
       </rect>
@@ -907,8 +872,8 @@ QPushButton:pressed {
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>100</x>
-       <y>453</y>
+       <x>510</x>
+       <y>380</y>
        <width>261</width>
        <height>61</height>
       </rect>
@@ -984,6 +949,16 @@ QPushButton:pressed {
       </item>
      </layout>
     </widget>
+    <widget class="QCustomPlot" name="graph" native="true">
+     <property name="geometry">
+      <rect>
+       <x>390</x>
+       <y>0</y>
+       <width>411</width>
+       <height>371</height>
+      </rect>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -991,13 +966,21 @@ QPushButton:pressed {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>810</width>
      <height>24</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>View/QCustomPlot-library/lib/qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
