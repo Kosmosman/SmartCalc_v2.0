@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "../Model/parcer.h"
@@ -25,7 +26,7 @@ struct CalculatorTest {
   std::vector<std::string> incorrect_collection{
       "sin-",   "(-)",  "cos-45", "ln",     "-5-",          "log(*)",
       "1+2+3+", "*2+2", "4**2",   "sincos", "2342tey35twr", "1321.23413.4",
-      ")",      "-(",   "0/",     "(sin)"};
+      ")",      "-(",   "0/",     "(sin)",  "(10",          "tan."};
 };
 
 TEST(Validator, CorrectTest1) {
@@ -208,14 +209,16 @@ TEST(Calculator, IncorrectReplaceTest) {
   EXPECT_FALSE(one.IsValideExpression());
 }
 
-TEST(Calculator, DotTest) {
+TEST(Calculator, IncorrectReplaceTestWithNumBefore) {
   s21::Parcer one;
-  one("5+xx", "10");
+  one("x5", "10");
   EXPECT_FALSE(one.IsValideExpression());
-  auto res = one.CreateDots("10+x", {-10, 10}, {-10, 10});
-  for (auto it : res.second) {
-    std::cout << "Second = " << it << std::endl;
-  }
+}
+
+TEST(Calculator, IncorrectReplaceTestWithNumAfter) {
+  s21::Parcer one;
+  one("5x", "10");
+  EXPECT_FALSE(one.IsValideExpression());
 }
 
 int main(int argc, char **argv) {

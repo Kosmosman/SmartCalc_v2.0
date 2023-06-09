@@ -2,6 +2,7 @@
 
 #include <QVector>
 #include <algorithm>
+#include <iostream>
 #include <utility>
 
 #include "./ui_calculator.h"
@@ -65,22 +66,26 @@ void Calculator::PrintOperators() {
 void Calculator::Result() {
   std::string text = ui->label->text().toStdString();
   std::string value = ui->lineEdit_value->text().toStdString();
-  if (cont_.IsValid(text))
-    ui->label->setText(QString::fromUtf8(cont_.Result(text, value)));
+  if (cont_.IsValid(text, value))
+    ui->label->setText(QString::fromUtf8(cont_.Result()));
   else
     ui->label->setText("ERROR");
   result_pressed_ = true;
+  ui->lineEdit_value->setText("0");
 }
 
-void Calculator::Clear() { ui->label->setText(""); }
+void Calculator::Clear() {
+  ui->label->setText("");
+  ui->lineEdit_value->setText("0");
+}
 
 void Calculator::Display() {
+  std::pair<int, int> x_borders{ui->lineEdit_x_start->text().toInt(),
+                                ui->lineEdit_x_end->text().toInt()};
+  std::pair<int, int> y_borders{ui->lineEdit_y_start->text().toInt(),
+                                ui->lineEdit_y_end->text().toInt()};
   std::pair<std::vector<double>, std::vector<double>> dots =
-      cont_.CreateDots(ui->label->text().toStdString(),
-                       {ui->lineEdit_x_start->text().toInt(),
-                        ui->lineEdit_x_end->text().toInt()},
-                       {ui->lineEdit_y_start->text().toInt(),
-                        ui->lineEdit_y_end->text().toInt()});
+      cont_.CreateDots(ui->label->text().toStdString(), x_borders, y_borders);
   QVector<double> x_dots =
       QVector<double>{dots.first.begin(), dots.first.end()};
   QVector<double> y_dots =
@@ -90,12 +95,10 @@ void Calculator::Display() {
   ui->graph->graph(0)->setData(x_dots, y_dots);
   ui->graph->xAxis->setLabel("x");
   ui->graph->yAxis->setLabel("y");
-  ui->graph->xAxis->setRange(ui->lineEdit_x_start->text().toInt(),
-                             ui->lineEdit_x_end->text().toInt());
-  ui->graph->yAxis->setRange(ui->lineEdit_y_start->text().toInt(),
-                             ui->lineEdit_y_end->text().toInt());
+  ui->graph->xAxis->setRange(x_borders.first, x_borders.second);
+  ui->graph->yAxis->setRange(y_borders.first, y_borders.second);
   ui->graph->replot();
-  ui->label->setText("");
+  Clear();
 }
 
 }  // namespace s21

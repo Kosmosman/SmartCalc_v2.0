@@ -9,11 +9,11 @@ namespace s21 {
 class Controller {
  public:
   Controller() = default;
-  bool IsValid(const std::string& str);
-  std::string Result(const std::string& str, const std::string& x);
+  bool IsValid(const std::string& str, const std::string& x);
+  std::string Result();
   std::pair<std::vector<double>, std::vector<double>> CreateDots(
-      const std::string& str, std::pair<int, int> x_borders,
-      std::pair<int, int> y_borders);
+      const std::string& str, std::pair<int, int>& x_borders,
+      std::pair<int, int>& y_borders);
 
  private:
   Parcer model_;

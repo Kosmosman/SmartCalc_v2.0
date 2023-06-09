@@ -1,5 +1,5 @@
-#ifndef CALCULATOR_H
-#define CALCULATOR_H
+#ifndef VIEW_H
+#define VIEW_H
 
 #include <QMainWindow>
 
@@ -33,4 +33,4 @@ class Calculator : public QMainWindow {
   void Display();
 };
 }  // namespace s21
-#endif  // CALCULATOR_H
+#endif  // VIEW_H

@@ -1,17 +1,15 @@
 #include "controller.h"
 
 namespace s21 {
-bool Controller::IsValid(const std::string& str) {
-  return model_(str, "0").IsValideExpression();
+bool Controller::IsValid(const std::string& str, const std::string& x) {
+  return model_(str, x).IsValideExpression();
 };
 
-std::string Controller::Result(const std::string& str, const std::string& x) {
-  return std::to_string(model_(str, x).Answer());
-}
+std::string Controller::Result() { return std::to_string(model_.Answer()); }
 
 std::pair<std::vector<double>, std::vector<double>> Controller::CreateDots(
-    const std::string& str, std::pair<int, int> x_borders,
-    std::pair<int, int> y_borders) {
+    const std::string& str, std::pair<int, int>& x_borders,
+    std::pair<int, int>& y_borders) {
   return model_.CreateDots(str, x_borders, y_borders);
 };
 

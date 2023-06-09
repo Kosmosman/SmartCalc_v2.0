@@ -32,8 +32,8 @@ class Parcer {
   double Answer() const noexcept { return is_valid_ ? num_stack_.top() : 0; };
   bool IsValideExpression() const noexcept { return is_valid_; };
   std::pair<std::vector<double>, std::vector<double>> CreateDots(
-      const std::string& str, std::pair<int, int> x_borders,
-      std::pair<int, int> y_borders);
+      const std::string& str, std::pair<int, int>& x_borders,
+      std::pair<int, int>& y_borders);
 
  private:
   size_t TakePriority(const std::string& op) noexcept;

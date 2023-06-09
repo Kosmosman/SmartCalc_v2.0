@@ -60,7 +60,10 @@ double Parcer::ReadString() {
       if (is_valid_) CheckFunction(&ptr, end);
       if (is_valid_) CheckOperator(&ptr, end);
     }
-    while (!op_stack_.empty() && !num_stack_.empty()) ChooseCalculateMode();
+    while (!op_stack_.empty() && !num_stack_.empty()) {
+      if (op_stack_.size() == 1 && num_stack_.size() == 1) break;
+      ChooseCalculateMode();
+    }
     if (!op_stack_.empty() || num_stack_.empty()) is_valid_ = false;
   }
   return num_stack_.empty() ? 0 : num_stack_.top();
@@ -179,6 +182,13 @@ bool Parcer::ValidatorForX() {
     if (prev == 'x' && it == 'x') {
       is_valid_ = false;
       break;
+    } else if (((std::isdigit(prev) || prev == '.') && it == 'x') ||
+               (prev == 'x' && (std::isdigit(it) || it == '.'))) {
+      is_valid_ = false;
+      break;
+    } else if (prev == 'x' && std::isalpha(it)) {
+      is_valid_ = false;
+      break;
     }
     prev = it;
   }
@@ -190,6 +200,7 @@ void Parcer::CheckDigit(char** ptr, char* end) {
   while (*ptr != end && (std::isdigit(**ptr) || **ptr == '.'))
     buffer += *((*ptr)++);
   if (!buffer.empty()) {
+    if (buffer == ".") buffer = "0";
     num_stack_.push(std::stod(buffer));
     digit_last_ = true;
   }
@@ -257,16 +268,18 @@ void Parcer::Replace(const std::string& x) {
 }
 
 std::pair<std::vector<double>, std::vector<double>> Parcer::CreateDots(
-    const std::string& str, std::pair<int, int> x_borders,
-    std::pair<int, int> y_borders) {
+    const std::string& str, std::pair<int, int>& x_borders,
+    std::pair<int, int>& y_borders) {
   expression_ = str;
   std::string num_in_str;
   std::pair<std::vector<double>, std::vector<double>> result;
   if (ValidatorForX()) {
     if (x_borders.first >= x_borders.second ||
         y_borders.first >= y_borders.second) {
-      x_borders.first = y_borders.first = -10;
-      x_borders.second = y_borders.second = 10;
+      x_borders.first = -10;
+      y_borders.first = -10;
+      x_borders.second = 10;
+      y_borders.second = 10;
     }
     int top_border = abs(x_borders.first) + abs(x_borders.second);
     result.first.reserve(top_border * 10);
